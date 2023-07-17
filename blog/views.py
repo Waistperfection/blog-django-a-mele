@@ -1,12 +1,37 @@
+# django
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView
 from django.http import HttpRequest, HttpResponse
 from django.core.mail import send_mail
 from django.views.decorators.http import require_POST
-
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+# libs
+from taggit.models import Tag
+# user
 from mysite.settings import EMAIL_HOST_USER
 from .forms import EmailPostForm, CommentForm
 from .models import Post, Comment
+
+
+def post_list(request: HttpRequest, tag_slug: str=None) -> HttpResponse:
+    post_list = Post.published.all()
+    tag = None
+    if tag_slug:
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        post_list = post_list.filter(tags__in=[tag])
+    paginator = Paginator(post_list, 3)
+    page_number = request.GET.get('page', 1)
+    try:
+        posts = paginator.page(page_number)
+    except PageNotAnInteger:
+        posts = paginator.page(1)
+    except EmptyPage:
+        posts = paginator.page(paginator.num_pages)
+    print(*(post.tags.all() for post in posts), sep = '\n')
+    return render(request,
+                  'blog/post/list.html',
+                  {'posts': posts,
+                   'tag': tag})
 
 
 class PostListView(ListView):
