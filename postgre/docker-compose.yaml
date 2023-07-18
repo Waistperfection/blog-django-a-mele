@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:15-alpine3.18
+    environment:
+      POSTGRES_DB: "myblogdb"
+      POSTGRES_USER: "myblogadmin"
+      POSTGRES_PASSWORD: "myblogpgadmin"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - "5432:5432"
+    volumes:
+      - myblog-data:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myblogadmin -d myblogdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 4G
+
+volumes:
+  myblog-data:
