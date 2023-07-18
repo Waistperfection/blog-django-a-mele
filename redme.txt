@@ -1,0 +1,5 @@
+add extention to postgres
+#commands in container
+psql -U myblogadmin --dbname="myblogdb" # connect to db with PSQL
+create extension if not exists pg_trgm; # add trigramm extensoi to postgres
+# use with smile
